@@ -1,4 +1,4 @@
-import { Component, createMemo, createEffect, createSignal } from "solid-js";
+import { Component, createMemo, createEffect, createSignal, onCleanup } from "solid-js";
 import { styled } from "solid-styled-components";
 import DrawerItem from "./DrawerItem";
 
@@ -11,9 +11,16 @@ type propsInterface = {
 
 type DrawerProps = { isExpanded: boolean, isScrolled: boolean }
 
-const SCROLLBAR_WIDTH = window.innerWidth - document.documentElement.clientWidth;
 // TODO: Apply a better theming method.
 const TOP_BAR_HEIGHT = 40;
+let SCROLLBAR_WIDTH: number;
+createEffect(() => {
+  // RAF is used here so that scrollbar width calculation is done "after paint".
+  const raf = requestAnimationFrame(() => {
+    SCROLLBAR_WIDTH = window.innerWidth - document.documentElement.clientWidth;
+  });
+  onCleanup(() => cancelAnimationFrame(raf));
+});
 
 const Div = styled.div((props: DrawerProps) => {
   const baseStyles = `
@@ -32,9 +39,6 @@ const Div = styled.div((props: DrawerProps) => {
 
   // TODO - When it's not scrolled, on hover add border (with box-shadow, to not break sizings) on the inline-end edge.
   // &:hover { ... }
-
-  //FIXME - On page refresh, isScrolled is still true, but wrong styling is done, e.g., the width remains on 70, while it has to be 70 + SCROLLBAR_WIDTH.
-  console.log({isScrolled: props.isScrolled});
 
   let dynamicStyles = ``;
   if(props.isScrolled){
@@ -56,7 +60,6 @@ const Div = styled.div((props: DrawerProps) => {
     }
   }
 
-  // console.log(baseStyles + dynamicStyles);
   return baseStyles + dynamicStyles;
 })
 
@@ -64,7 +67,7 @@ let drawerRef: HTMLDivElement;
 
 const Drawer: Component<propsInterface> = (props) => {
     const isExpanded = createMemo(() => props.isExpandedByHandle || props.isHoverExpanded)
-    const [ isScrolled, setIsScrolled ] = createSignal(false);
+    const [ isScrolled, setIsScrolled ] = createSignal(true);
     
     const MIN_DISTANCE_TO_BOTTOM_BEFORE_SCROLL = 30;
     createEffect(function scrollYHandler(){
