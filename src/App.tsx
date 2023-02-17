@@ -14,6 +14,7 @@ const Bar = styled.div`
   width: 100%;
   background-color: #ff005c;
   position: sticky;
+  top: 0;
 `
 
 const Button = styled.button`

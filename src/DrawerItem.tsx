@@ -1,9 +1,9 @@
 import { Component, Show } from "solid-js";
 import { styled, css } from "solid-styled-components";
 
-const DrawerItem: Component<{isExpanded: boolean, title: string}> = (props) => {
+const DrawerItem: Component<{isExpanded: boolean, title: string, icon?: string }> = (props) => {
   
-    const Wrapper = styled.div`
+    const Wrapper = styled.div<{isExpanded: boolean}>`
         display: flex;
         height: 2.5em;
         position: relative;
@@ -11,6 +11,9 @@ const DrawerItem: Component<{isExpanded: boolean, title: string}> = (props) => {
         margin-inline-end: 6px;
         border-start-end-radius: 30px;
         border-end-end-radius: 30px;
+        /* To prevent width go all the way back to 0 and then increase, when set to auto (which will look glitchy). */
+        min-width: 70px;
+        width: ${props => !props.isExpanded ? "70px" : "auto"};
         transition: border-raius 0.2s;
         &:nth-child(1) {
             margin-top: 6px;
@@ -56,8 +59,8 @@ const DrawerItem: Component<{isExpanded: boolean, title: string}> = (props) => {
         isChopped = true;
     }
 
-  return <Wrapper>
-        <DrawerIcon>icon</DrawerIcon>
+  return <Wrapper isExpanded={props.isExpanded}>
+        <DrawerIcon>{props.icon || "icon"}</DrawerIcon>
         <DrawerItemTitle isExpanded={props.isExpanded}>{
             isChopped ? choppedTitle + "..." : props.title
         }</DrawerItemTitle>
